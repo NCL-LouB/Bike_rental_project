@@ -12,36 +12,205 @@ head(bike.rental.data, 5)
 table(is.na(bike.rental.data))
 # All data fields have an entry
 
+################## Inspect the categorical variables ##################
+##### SEASON #####
 table(bike.rental.data$season)
 #FALL SPRING SUMMER WINTER 
 #188    181    184    178 
 
-table(bike.rental.data$yr)
-#2011 2012 
-#365  366 
-# 2012 was a leap year
+# SEASON summary table
+bike.rental.data %>% 
+  group_by(season) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+)
 
-table(bike.rental.data$mnth)
-#APR AUG DEZ FEB JAN JUL JUN MAR MAY NOV OKT SEP 
-#60  62  62  57  62  62  60  62  62  60  62  60 
+# Plot showing the percentage of total rentals by season
+ggplot(data = bike.rental.data %>% 
+         group_by(season) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+         ) +
+  geom_col(aes(x=season, y=percentage))
 
-table(bike.rental.data$holiday)
-#HOLIDAY NO HOLIDAY 
-#21        710 
-
-table(bike.rental.data$weekday)
-#FRI MON SAT SUN THU TUE WED 
-#104 105 105 105 104 104 104 
-
-table(bike.rental.data$workingday)
-#NO WORKING DAY    WORKING DAY 
-#    231            500 
-
-table(bike.rental.data$weathersit)
+##### WEATHER.CATEGORY #####
+table(bike.rental.data$weather.category)
 #GOOD           MISTY    RAIN/SNOW/STORM 
 #463             247              21 
 # From this summary we can see that there were more good weather 
 # days than misty or rain/snow/storm days
+
+# WEATHER.CATEGORY summary table
+bike.rental.data %>% 
+  group_by(weather.category) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by weather.category
+ggplot(data = bike.rental.data %>% 
+         group_by(weather.category) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=weather.category, y=percentage))
+
+
+
+##### HOLIDAY #####
+table(bike.rental.data$holiday)
+#HOLIDAY NO HOLIDAY 
+#21        710 
+
+# HOLIDAY summary table
+bike.rental.data %>% 
+  group_by(holiday) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by holiday
+ggplot(data = bike.rental.data %>% 
+         group_by(holiday) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=holiday, y=percentage))
+
+##### WORKING.DAY #####
+table(bike.rental.data$working.day)
+#NO WORKING DAY    WORKING DAY 
+#    231            500 
+
+# WORKING.DAY summary table
+bike.rental.data %>% 
+  group_by(working.day) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by working.day
+ggplot(data = bike.rental.data %>% 
+         group_by(working.day) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=working.day, y=percentage))
+
+##### YEAR #####
+table(bike.rental.data$year)
+#2011 2012 
+#365  366 
+# 2012 was a leap year
+
+# YEAR summary table
+bike.rental.data %>% 
+  group_by(year) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by year
+ggplot(data = bike.rental.data %>% 
+         group_by(year) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=year, y=percentage))
+
+##### JUST.MONTH2 #####
+table(bike.rental.data$just.month2)
+# Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec 
+# 62  57  62  60  62  60  62  62  60  62  60  62 
+
+# JUST.MONTH2 summary table
+bike.rental.data %>% 
+  group_by(just.month2) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by just.month2
+ggplot(data = bike.rental.data %>% 
+         group_by(just.month2) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=just.month2, y=percentage))
+
+##### JUST.DAYOFWEEK2 #####
+table(bike.rental.data$just.dayofweek2)
+# Sun Mon Tue Wed Thu Fri Sat 
+# 105 105 104 104 104 104 105 
+
+# JUST.DAYOFWEEK2 summary table
+bike.rental.data %>% 
+  group_by(just.dayofweek2) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+# Plot showing the percentage of total rentals by just.dayofweek2
+ggplot(data = bike.rental.data %>% 
+         group_by(just.dayofweek2) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+) +
+  geom_col(aes(x=just.dayofweek2, y=percentage))
+
+
+################## Inspect the continuous variables ##################
+
+
 
 # Temperature
 table(bike.rental.data$temp)

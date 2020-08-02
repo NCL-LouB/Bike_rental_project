@@ -58,11 +58,15 @@ The next step was to investigate what information is contained within the data s
 
 Review the variables in the original bike.rental.data csv file. Please note that the original data has been saved as a data frame in R named rental.data.
 
-``` {r initial review: archetype data} 
+``` {r initial review: rental.data} 
 head(rental.data, 5)
 ```
+.
+
+.
 
 _**Table 1: Summary of the variables from bike_rental_data csv file**_ 
+
 Column Header | Class | Example | Description
 ------------- | ------------- | ------------- | -------------
 season  | character | "SPRING" | The season, spring, summer, fall or winter
@@ -77,7 +81,7 @@ wind speed  | numeric | 10.7 | Wind speed (mph)
 cnt  | integer | 985 | The number of bikes rented that day (rental count) 
 days_since_2011  | integer | 0,1,2 | A sequence of numbers starting a 0 on 1 January 2011 and increasing by 1 each day
 
-#### 2.1.1 Data Summary
+#### 2.1.1 Data Summary  
 
 An initial review of the data shows that the fields of most relevant to the project goal are:
 
@@ -88,7 +92,7 @@ An initial review of the data shows that the fields of most relevant to the proj
 * hum
 * windspeed
 
-#### 2.1.1 Data Assumptions
+#### 2.1.1 Data Assumptions  
 
 The following data assumptions were made. They should be verified with the data owner at the next opportunity. 
 
@@ -97,19 +101,108 @@ The following data assumptions were made. They should be verified with the data 
 * Wind speed is measured in miles per hour (mph)
 * Temperature, humidity and wind speed can be rounded to integers, as this level of detail is most appropriate and will make analysis and understanding easier.  
 
-### 2.2 Data Preparation Notes
+### 2.2 Data Preparation Notes  
 
-* Update the date variables (yr, month, weekday and days_since_2011)
-+ The days_since_2011 variable is helpful as it indicates the date for each observation. It would be easier to navigate the data if proper date fields were created. 
-+ Create date column, use the days_since_2011 variable to quality check the new date variable. Eg. observation 31 of days_since_2011 is 30 but this equates to 31 January 2011.
-+ Introduce the lubridate package to create new date variables, just.day, just.dayofweek, just.dayofweek2 (character labels) , just.month, just.month2 (character labels) and year
-+ Remove the original date columns, which are no longer needed (yr, mnth, weekday)
-* Convert categorical character variables to factors (season, holiday, workingday and weathersit)
-* Rename variables for clarity and to create naming convention ('cnt' to 'rental.count', 'weathersit' to 'weather.category', 'temp' to 'temperature, 'hum' to 'humidity', 'windspeed' to 'wind.speed', 'workingday' to 'working.day' and 'days_since_2011' to 'days.since.2011')
-* Reorder variables so the response variable is listed first
-* Round the temperature, wind speed and humidity columns so they become integers
-* Create a new data frame for regression
-+ Substitute numbers for the categorical, factor values (season, weather.category, holiday and working.day)
+1. Update the date variables (yr, month, weekday and days_since_2011)
+i) The days_since_2011 variable is helpful as it indicates the date for each observation. It would be easier to navigate the data if proper date fields were created. 
+ii) Create date column, use the days_since_2011 variable to quality check the new date variable. Eg. observation 31 of days_since_2011 is 30 but this equates to 31 January 2011.
+iii) Introduce the lubridate package to create new date variables, just.day, just.dayofweek, just.dayofweek2 (character labels) , just.month, just.month2 (character labels) and year
+iv) Remove the original date columns, which are no longer needed (yr, mnth, weekday)
+2. Convert categorical character variables to factors (season, holiday, workingday and weathersit)
+3. Rename variables for clarity and to create naming convention ('cnt' to 'rental.count', 'weathersit' to 'weather.category', 'temp' to 'temperature, 'hum' to 'humidity', 'windspeed' to 'wind.speed', 'workingday' to 'working.day' and 'days_since_2011' to 'days.since.2011')
+4. Reorder variables so the response variable is listed first
+5. Round the temperature, wind speed and humidity columns so they become integers
+6. Create a new data frame for regression
+i) Substitute numbers for the categorical, factor values (season, weather.category, holiday and working.day)
+
+#### 2.2.1 Final Data Frames
+After preparing the data we are left with three data frames
+
+Data Frame | Description | Dimensions
+------------- | ------------- | -------------
+rental.data  | The original data  | 731 obs. and 12 variables
+bike.rental.data  | Data preparation steps 1-5 applied | 731 obs. and 16 variables
+bike.rental.data.reg  | Data preparation steps 1-6 applied | 731 obs. and 16 variables
+
+### 2.3 Initial EDA
+
+The table function is used create table summaries of what information is included in each of of the columns of categorical data. 
+
+``` {r data description and exploration: reviewing the categorical data, eval = TRUE}
+table(bike.rental.data$season)
+table(bike.rental.data$weather.category)
+table(bike.rental.data$holiday)
+table(bike.rental.data$working.day)
+table(bike.rental.data$year)
+table(bike.rental.data$just.month2)
+table(bike.rental.data$just.dayofweek2)
+```
+
+It would be more interesting to see how these factors affect the daily rental count
+``` {r data description and exploration: categorical data against rentals, eval = TRUE}
+bike.rental.data %>% 
+  group_by(season) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+)
+
+bike.rental.data %>% 
+  group_by(weather.category) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
 
 
+bike.rental.data %>% 
+  group_by(holiday) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
 
+
+bike.rental.data %>% 
+  group_by(working.day) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+bike.rental.data %>% 
+  group_by(year) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+bike.rental.data %>% 
+  group_by(just.month2) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+bike.rental.data %>% 
+  group_by(just.dayofweek2) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100)
+  )
+
+```
