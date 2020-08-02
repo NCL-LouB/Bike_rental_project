@@ -1,0 +1,32 @@
+---
+title: "Bike Rental Report"
+author: "Louise Braithwaite"
+date: "31/07/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir=normalizePath('~/NICD work/Bike_Rental_Report'))
+```
+
+``` {r loading, include=FALSE}
+library(ProjectTemplate)
+load.project()
+```
+
+## Business Question
+
+### How does the change in weather effect the number of bikes rented out each day?
+
+## Data Overview and Preparation
+
+``` {r initial review: archetype data} 
+head(bike.rental.data, 5)
+head(bike.rental.data, 5)
+```
+
+An initial review of the data shows that 
+
+A bike rental company has been collecting data on how many bikes they have rented out to customers each day for a period of 2 years. In addition to the number of bikes rented, they have also captured the weather conditions of each day. The company would like help to understand how the change in weather effects the number of bikes the company rent out each day. Please see the attached dataset labelled ‘bike rental data’.
+
