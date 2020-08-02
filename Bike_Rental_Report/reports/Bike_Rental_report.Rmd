@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir=normalizePath('~/NICD work/Bike_Rental_Report'))
+knitr::opts_knit$set(root.dir=normalizePath('~/Bike_rental_project/Bike_Rental_Report'))
 ```
 
 ``` {r loading, include=FALSE}
@@ -15,18 +15,101 @@ library(ProjectTemplate)
 load.project()
 ```
 
-## Business Question
+## 1. Business Overview
 
-### How does the change in weather effect the number of bikes rented out each day?
+Over a two year period a bike rental company has collected data on the number of daily rentals, daily weather conditions and day type. The company has commisioned the NICD to analyse and deliver business insights from this data set. The company would like help to understand how the change in weather effects the number of bikes the company rent out each day.
 
-## Data Overview and Preparation
+### 1.1 Data mining goals and success criteria
+
+This project will focus on data description and summarisation of the data set to help develop insights into the impact weather has on bike rentals.
+
+The goal of this project is to:
+
+__*Identify how the change in weather effect the number of bikes rented out each day.*__
+
+
+### 1.2 Requirements, assumptions, and constraints
+
+Requirements:
+
+* A report with a maximum of 500 words and 2 figures, detailing how the data has been interpreted and what insights have been gained.
+* A Git repository or the work completed
+* A ProjectTemplate folder containing reports and source code
+
+Assumptions and constraints: 
+
+* We can only work with the data set provided
+* No meta date has been provided. All data assumptions should be logged so they can be verified later
+
+
+
+## 2. Data Overview and Preparation
+One data set was provided by the bike rental company as a csv file. The data set is complete with no missing values. 
+
+The next step was to investigate what information is contained within the data set and evaluate which variables relate to the project goal. The section below contain:
+
+* a snapshot of the first 5 vectors of the data file. This provides the column headers and vector class
+* a table providing details on each variable
+* a summary explaining which elements are most helpful at addressing the project goal
+* a summary of data assumptions
+* data preparation considerations: any initial thoughts that should be considered before data preparation or analysis
+
+## 2.1 Data Overview
+
+Review the variables in the original bike.rental.data csv file. Please note that the original data has been saved as a data frame in R named rental.data.
 
 ``` {r initial review: archetype data} 
-head(bike.rental.data, 5)
-head(bike.rental.data, 5)
+head(rental.data, 5)
 ```
 
-An initial review of the data shows that 
+_**Table 1: Summary of the variables from bike_rental_data csv file**_ 
+Column Header | Class | Example | Description
+------------- | ------------- | ------------- | -------------
+season  | character | "SPRING" | The season, spring, summer, fall or winter
+yr  | integer | 2011 | The year, either 2011 or 2012
+mnth  | character | "JAN" | The month, all in shortened character form (e.g. "JAN", "FEB", "MAR")
+holiday | character | "NO HOLIDAY"  | Whether the day is a holiday "HOLIDAY" or not "NO HOLIDAY"
+weekday | character | "SAT" | The day of the week, all in shortened character form (e.g. "SAT", "SUN", "MON")
+weathersit | character | "MISTY" | The overall weather category ("GOOD", "MISTY" or "RAIN/SNOW/STORM")
+temp  | numeric | 8.18 | Temperature (degrees celsius, °C) 
+hum  | numeric | 80.6 | Relative humidity (%)
+wind speed  | numeric | 10.7 | Wind speed (mph)
+cnt  | integer | 985 | The number of bikes rented that day (rental count) 
+days_since_2011  | integer | 0,1,2 | A sequence of numbers starting a 0 on 1 January 2011 and increasing by 1 each day
 
-A bike rental company has been collecting data on how many bikes they have rented out to customers each day for a period of 2 years. In addition to the number of bikes rented, they have also captured the weather conditions of each day. The company would like help to understand how the change in weather effects the number of bikes the company rent out each day. Please see the attached dataset labelled ‘bike rental data’.
+#### 2.1.1 Data Summary
+
+An initial review of the data shows that the fields of most relevant to the project goal are:
+
+* cnt
+* season
+* weathersit
+* temp
+* hum
+* windspeed
+
+#### 2.1.1 Data Assumptions
+
+The following data assumptions were made. They should be verified with the data owner at the next opportunity. 
+
+* Temperature is measured in degrees celsius (°C) 
+* Humidity measure is relative humidity (%)
+* Wind speed is measured in miles per hour (mph)
+* Temperature, humidity and wind speed can be rounded to integers, as this level of detail is most appropriate and will make analysis and understanding easier.  
+
+### 2.2 Data Preparation Notes
+
+* Update the date variables (yr, month, weekday and days_since_2011)
++ The days_since_2011 variable is helpful as it indicates the date for each observation. It would be easier to navigate the data if proper date fields were created. 
++ Create date column, use the days_since_2011 variable to quality check the new date variable. Eg. observation 31 of days_since_2011 is 30 but this equates to 31 January 2011.
++ Introduce the lubridate package to create new date variables, just.day, just.dayofweek, just.dayofweek2 (character labels) , just.month, just.month2 (character labels) and year
++ Remove the original date columns, which are no longer needed (yr, mnth, weekday)
+* Convert categorical character variables to factors (season, holiday, workingday and weathersit)
+* Rename variables for clarity and to create naming convention ('cnt' to 'rental.count', 'weathersit' to 'weather.category', 'temp' to 'temperature, 'hum' to 'humidity', 'windspeed' to 'wind.speed', 'workingday' to 'working.day' and 'days_since_2011' to 'days.since.2011')
+* Reorder variables so the response variable is listed first
+* Round the temperature, wind speed and humidity columns so they become integers
+* Create a new data frame for regression
++ Substitute numbers for the categorical, factor values (season, weather.category, holiday and working.day)
+
+
 
