@@ -1,16 +1,16 @@
 library('ProjectTemplate')
 load.project()
 #install.packages('patchwork')
-library(patchwork)
+#library(patchwork)
 #install.packages('hrbrthemes')
-library(hrbrthemes)
+#library(hrbrthemes)
 
-# inspect the first 5 rows
+# inspect the first 5 rows 
 head(bike.rental.data, 5)
 
-# locate any missing data fields. 
+# Are there any missing data fields? No. 
 table(is.na(bike.rental.data))
-# All data fields have an entry
+
 
 ################## Inspect the categorical variables ##################
 ##### SEASON #####
@@ -28,7 +28,7 @@ bike.rental.data %>%
             percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
 )
 
-# Plot showing the percentage of total rentals by season
+# Plot showing the median rentals by season
 ggplot(data = bike.rental.data %>% 
          group_by(season) %>%
          summarise(total.rentals = sum(rental.count),
@@ -38,7 +38,30 @@ ggplot(data = bike.rental.data %>%
                    percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
          )
          ) +
-  geom_col(aes(x=season, y=percentage))
+  geom_col(aes(x=season, y=median.rentals))
+
+# The median rental number is significantly lower in spring than the other months
+# Let's see if the lower rental rate in spring could be attributed to a lower 
+# median temperature in this season
+
+# Plot showing the median temperature by season
+ggplot(data = bike.rental.data %>% 
+         group_by(season) %>%
+         summarise(total.temperature = sum(temperature),
+                   median.temperature = median(temperature),
+                   mean.temperature = mean(temperature),
+                   sd.temperature = sd(temperature)) # 11171 = sum(bike.rental.data$temperature)
+         ) + 
+  geom_col(aes(x=season, y = median.temperature))
+
+bike.rental.data %>% 
+  group_by(season) %>%
+  summarise(total.temperature = sum(temperature),
+            median.temperature = median(temperature),
+            mean.temperature = mean(temperature),
+            sd.temperature = sd(temperature))
+
+# Yes the lower median number of rentals (2209 rentals) in spring reflects the low median temperature in spring (5 degrees)
 
 ##### WEATHER.CATEGORY #####
 table(bike.rental.data$weather.category)
@@ -291,6 +314,19 @@ ggplot(bike.rental.data, aes(x=date)) +
   ) +
   ggtitle("Number of rentals per day and humidity")
 
+
+# Bar chart of temperature and count
+tempertaure.obs = data.frame(table(bike.rental.data$temperature))
+colnames(tempertaure.obs) = c("temperature", "count")
+tempertaure.obs$temperature = as.numeric(tempertaure.obs$temperature)
+head(arrange(tempertaure.obs, desc(count)), 5)
+# Bar chart of temperature and count
+ggplot(data = tempertaure.obs) +
+  geom_col(mapping = aes(x=temperature, y = count)) +
+  scale_x_continuous(breaks = round(seq(min(bike.rental.data$temperature), max(bike.rental.data$temperature), by = 5),1)) +
+  theme_classic()
+
+
 # Count the number of rentals on all days that have the same temperature
 # Calculate the median number of rentals when the temp is a given temperature
 rentalsBYhumidity = bike.rental.data %>% 
@@ -408,3 +444,35 @@ ggplot(data = top.rental.daysBYtemp, aes(x=temperature)) +
   geom_col(aes(y=mean.daily.rentals)) +
   geom_line(aes(y=median.daily.rentals), color = "red")
 
+
+# Rental Count
+ggplot(data = bike.rental.data) +
+  geom_histogram(mapping = aes(x=rental_count))
+summary(bike.rental.data$rental_count)
+# Min rental count is 22
+# Median rental count is 4548
+# Mean rental count is 4504
+# Max rental count is 8714
+sd(bike.rental.data$rental_count)
+# 1937.211 
+# There is a lot of spread around the mean daily rental, so it is understandable that the company wants 
+# to understand why this is so
+
+ggplot(data = bike.rental.data) +
+  geom_point(mapping = aes(x=date, y=rental_count, color = season))
+# There does appear to be a seasonal pattern to bike rental counts. 
+# Less rentals take place in Spring
+
+rentalsBYseason = bike.rental.data %>% 
+  group_by(season) %>%
+  summarise(totalrentals = sum(rental_count),
+            medianrentals = median(rental_count),
+            median.temp = median(temp),
+            mean.temp = mean(temp),
+            median.hum = median(hum),
+            mean.hum = mean(hum),
+            median.windspeed = median(windspeed),
+            mean.windspeed = mean(windspeed),
+            good.weather.days = sum(weathersit == "GOOD"),
+            misty.days = sum(weathersit == "MISTY"),
+            bad.weather.days = sum(weathersit == "RAIN/SNOW/STORM"))
