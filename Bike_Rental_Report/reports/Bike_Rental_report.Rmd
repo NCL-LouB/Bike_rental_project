@@ -17,7 +17,7 @@ load.project()
 
 ## 1. Business Overview
 
-Over a two year period a bike rental company has collected data on the number of daily rentals, daily weather conditions and day type. The company has commisioned the NICD to analyse and deliver business insights from this data set. The company would like help to understand how the change in weather effects the number of bikes the company rent out each day.
+Over a two year period a bike rental company has collected data on the number of daily rentals, daily weather conditions (temperature, humidity, wind speed and precipitation type) and day type (season, year, month, holiday, weekday, working day). The company has commissioned the NICD to analyse and deliver business insights that will help them understand how the change in weather effects the number of bikes they rent each day.
 
 ### 1.1 Data mining goals and success criteria
 
@@ -25,7 +25,7 @@ This project will focus on data description and summarisation of the data set to
 
 The goal of this project is to:
 
-__*Identify how the change in weather effect the number of bikes rented out each day.*__
+__*Identify how the change in weather effects the number of bikes rented each day.*__
 
 
 ### 1.2 Requirements, assumptions, and constraints
@@ -33,7 +33,7 @@ __*Identify how the change in weather effect the number of bikes rented out each
 Requirements:
 
 * A report with a maximum of 500 words and 2 figures, detailing how the data has been interpreted and what insights have been gained.
-* A Git repository or the work completed
+* A Git repository of the work completed
 * A ProjectTemplate folder containing reports and source code
 
 Assumptions and constraints: 
@@ -42,27 +42,28 @@ Assumptions and constraints:
 * No meta date has been provided. All data assumptions should be logged so they can be verified later
 
 
-
 ## 2. Data Overview and Preparation
-One data set was provided by the bike rental company as a csv file. The data set is complete with no missing values. 
+A data set was provided by the bike rental company as a csv file. The data set is complete with no missing values. 
 
 The next step was to investigate what information is contained within the data set and evaluate which variables relate to the project goal. The section below contain:
 
-* a snapshot of the first 5 vectors of the data file. This provides the column headers and vector class
-* a table providing details on each variable
-* a summary explaining which elements are most helpful at addressing the project goal
+* a snapshot of the first 5 observations of the data file. This provides the column headers and vector class
+* a summary table of the variables in the provided data set
+* a list of the key variables associated with the project goal
 * a summary of data assumptions
-* data preparation considerations: any initial thoughts that should be considered before data preparation or analysis
+* data preparation notes
+* table summarising the final two data frames
+* a summary table of the variables in the final data set
+
+
 
 ## 2.1 Data Overview
 
-Review the variables in the original bike.rental.data csv file. Please note that the original data has been saved as a data frame in R named rental.data.
+Review the variables in the original bike.rental.data.csv file. In R the original data (bike.rental.data.csv) is saved as a data frame named 'rental.data'.
 
 ``` {r initial review: rental.data} 
 head(rental.data, 5)
 ```
-.
-
 .
 
 _**Table 1: Summary of the variables from bike_rental_data csv file**_ 
@@ -74,19 +75,19 @@ yr  | integer | 2011 | The year, either 2011 or 2012
 mnth  | character | "JAN" | The month, all in shortened character form (e.g. "JAN", "FEB", "MAR")
 holiday | character | "NO HOLIDAY"  | Whether the day is a holiday "HOLIDAY" or not "NO HOLIDAY"
 weekday | character | "SAT" | The day of the week, all in shortened character form (e.g. "SAT", "SUN", "MON")
-weathersit | character | "MISTY" | The overall weather category ("GOOD", "MISTY" or "RAIN/SNOW/STORM")
+workingday | character | "NO WORKING DAY"  | Whether it is a "WORKING DAY" or a "NO WORKING DAY"
+weathersit | character | "MISTY" | Weather category ("GOOD", "MISTY" or "RAIN/SNOW/STORM")
 temp  | numeric | 8.18 | Temperature (degrees celsius, °C) 
 hum  | numeric | 80.6 | Relative humidity (%)
-wind speed  | numeric | 10.7 | Wind speed (mph)
+windspeed  | numeric | 10.7 | Wind speed (mph)
 cnt  | integer | 985 | The number of bikes rented that day (rental count) 
 days_since_2011  | integer | 0,1,2 | A sequence of numbers starting a 0 on 1 January 2011 and increasing by 1 each day
 
-#### 2.1.1 Data Summary  
+#### 2.1.1 Key Variables
 
-An initial review of the data shows that the fields of most relevant to the project goal are:
+There are five variables we can use to help us determine how weather can effect the number of bicycle rentals. They are:
 
 * cnt
-* season
 * weathersit
 * temp
 * hum
@@ -99,110 +100,323 @@ The following data assumptions were made. They should be verified with the data 
 * Temperature is measured in degrees celsius (°C) 
 * Humidity measure is relative humidity (%)
 * Wind speed is measured in miles per hour (mph)
-* Temperature, humidity and wind speed can be rounded to integers, as this level of detail is most appropriate and will make analysis and understanding easier.  
+* Temperature, humidity and wind speed can be rounded to integers, as this level of detail is most appropriate and will make analysis and understanding easier. 
+* Weathersit variables are an indication of precipitation, "GOOD" can also be referred to as "NO.RAIN".
 
 ### 2.2 Data Preparation Notes  
+The following data preparation tasks were performed to ease the exploratory data analysis process.
 
-1. Update the date variables (yr, month, weekday and days_since_2011)
-i) The days_since_2011 variable is helpful as it indicates the date for each observation. It would be easier to navigate the data if proper date fields were created. 
-ii) Create date column, use the days_since_2011 variable to quality check the new date variable. Eg. observation 31 of days_since_2011 is 30 but this equates to 31 January 2011.
-iii) Introduce the lubridate package to create new date variables, just.day, just.dayofweek, just.dayofweek2 (character labels) , just.month, just.month2 (character labels) and year
-iv) Remove the original date columns, which are no longer needed (yr, mnth, weekday)
-2. Convert categorical character variables to factors (season, holiday, workingday and weathersit)
+1. To ease navigate through the data, create proper date variables to replace 'yr', 'month', 'weekday' and 'days_since_2011'. 
+i) Create date column, use the 'days_since_2011' variable to quality check the new date variable. Eg. observation 31 of 'days_since_2011' is 30 but this equates to 31 January 2011
+ii) Introduce the lubridate package to create new date variables, 'just.day', 'just.dayofweek', 'just.dayofweek2' (character labels), 'just.month', 'just.month2' (character labels) and 'year'
+iii) Remove the original date columns, which are no longer needed ('yr', 'mnth', 'weekday')
+2. Convert categorical character variables to factors ('season', 'holiday', 'workingday' and 'weathersit')
 3. Rename variables for clarity and to create naming convention ('cnt' to 'rental.count', 'weathersit' to 'weather.category', 'temp' to 'temperature, 'hum' to 'humidity', 'windspeed' to 'wind.speed', 'workingday' to 'working.day' and 'days_since_2011' to 'days.since.2011')
-4. Reorder variables so the response variable is listed first
-5. Round the temperature, wind speed and humidity columns so they become integers
-6. Create a new data frame for regression
-i) Substitute numbers for the categorical, factor values (season, weather.category, holiday and working.day)
+4. Round the 'temperature', 'wind.speed' and 'humidity' columns so they become integers
+5. Create new column called 'precipitation' using the data from 'weather.categories' and change the characters to numbers to reflect the factor levels
+6. Reorder variables so the response variable is listed first
 
-#### 2.2.1 Final Data Frames
-After preparing the data we are left with three data frames
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+.  
+
+
+
+
+#### 2.2.1 Updated Data Frame  
+.  
+
+
+_**Table 2: Summary of the variables from data frame after data has been prepared**_ 
+
+Column Header | Class | Example | Description
+------------- | ------------- | ------------- | -------------
+rental.count  | integer | 985 | The number of bikes rented that day 
+precipitation | numeric | 1 | Weather category (1 = "GOOD", 2 = "MISTY" and 3 = "RAIN/SNOW/STORM")
+temperature  | numeric | 8.18 | Temperature (degrees celsius, °C) 
+humidity  | numeric | 80.6 | Relative humidity (%)
+wind.speed  | numeric | 10.7 | Wind speed (mph)
+weather.category | character | "MISTY" | Weather category ("GOOD", "MISTY" or "RAIN/SNOW/STORM")
+season  | character | "SPRING" | The season, spring, summer, fall or winter
+holiday | character | "NO HOLIDAY"  | Whether the day is a holiday "HOLIDAY" or not "NO HOLIDAY"
+working.day | character | "NO WORKING DAY"  | Whether it is a "WORKING DAY" or a "NO WORKING DAY"
+days.since.2011  | integer | 0,1,2 | A sequence of numbers starting a 0 on 1 January 2011 and increasing by 1 each day
+date  | date | "2011-01-01" | The date
+just.day  | integer | 1 | The day of the month
+just.dayofweek  | numeric | 1 | The day, 1-7 (1 = Sunday, 2 = Monday, etc)
+just.dayofweek2  | factor | "Sun" | The day, all in shortened character form (e.g. "Sun", "Mon", "Tue")
+just.month | numeric | "JAN" | The month, 1-12 (1 = Jan, 2 = Feb etc)
+just.month2  | factor | "Jan" | The month, all in shortened character form (e.g. "Jan", "Feb", "Mar")
+year  | numeric | 2011 | The year, either 2011 or 2012
+
+.  
+.  
+.  
+
+
+#### 2.2.2 Final Data Frames  
+
+
+After preparing the data we are left with two data frames.
+
+
+_**Table 3: Summary of the two final data frames**_   
 
 Data Frame | Description | Dimensions
 ------------- | ------------- | -------------
 rental.data  | The original data  | 731 obs. and 12 variables
-bike.rental.data  | Data preparation steps 1-5 applied | 731 obs. and 16 variables
-bike.rental.data.reg  | Data preparation steps 1-6 applied | 731 obs. and 16 variables
+bike.rental.data  | Data preparation steps 1-6 applied | 731 obs. and 17 variables
 
-### 2.3 Initial EDA
+### 3. Exploratory Data Analysis  
 
-The table function is used create table summaries of what information is included in each of of the columns of categorical data. 
+#### Pairs Plot   
 
-``` {r data description and exploration: reviewing the categorical data, eval = TRUE}
-table(bike.rental.data$season)
-table(bike.rental.data$weather.category)
-table(bike.rental.data$holiday)
-table(bike.rental.data$working.day)
-table(bike.rental.data$year)
-table(bike.rental.data$just.month2)
-table(bike.rental.data$just.dayofweek2)
+Create a pairs plot of the variables relating to rental count and weather.
+
+```{r pairs plot, echo=FALSE}
+# subset key variables to create new data frame
+bike.rental.key = bike.rental.data[,1:5]
+# Produce a scatterplot matrix of predictor and explanatory variables
+pairs(bike.rental.key)
+
 ```
 
-It would be more interesting to see how these factors affect the daily rental count
-``` {r data description and exploration: categorical data against rentals, eval = TRUE}
-bike.rental.data %>% 
-  group_by(season) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-)
+Findings from pairs plot:
 
-bike.rental.data %>% 
-  group_by(weather.category) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
+* There appears to be a moderately strong and positive linear correlation between rental.count and temperature; * as temperature increases so does rental.count.
+* There appears to be some indication of a negative linear correlation between rental.count and humidity; as humidity increases rental.count decreases.
+* There appears to be some indication of a negative linear correlation between rental.count and wind speed; as wind speed increases rental.count decreases.
+* The pairs plot indicates that the weather.category is an indicator of precipiation, as the "MISTY" and "RAIN/SNOW/STORM" categories have higher recording of humidity. *It seems safe to assume that good indicates no rain.* 
 
 
-bike.rental.data %>% 
-  group_by(holiday) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
+```{r precipitation, message = FALSE}
+# Review the categorical precipitation data
+table(bike.rental.key$precipitation)
+```
+
+From the summary above table we can see that weather has been categorised as "GOOD" 63% of the time. 34% of the time the weather is categorised as "MISTY" and 3% of the time the weather is categorised as "RAIN/SNOW/STORM".
 
 
-bike.rental.data %>% 
-  group_by(working.day) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
 
-bike.rental.data %>% 
+```{r sample means and covariance matrix, echo=FALSE, include = FALSE}
+#### Sample Means and Covariance Matrix
+# calculate the variable means
+colMeans(bike.rental.key)
+# calculate the covariance matrix
+var(bike.rental.key)
+```
+
+
+#### Correlation Matrix  
+
+Use the correlation matrix to quantify the strength of a linear relationship between pairs of variables. 
+
+```{r correlation matrix, message=FALSE}
+# calculate the correlation matrix
+cor(bike.rental.key)
+```
+
+The correlation matrix confirms some of our previous observations:
+
+* The correlation between rental.count and temperature, 0.63, indicates a moderately strong positive linear relationship
+* The correlation between rental.count and weather.catergory, -0.3, suggests there is some indication of a negative linear relationship between the two variables. This supports the assumption that as the weather goes from no rain ("GOOD"), to "MISTY", to "RAIN/SNOW/STORM" the rental.count will decrease. 
+* The correlation between weather.category and humidity, 0.59, indicates a moderately strong positive linear relationship. Observation makes sense, as we would expect the air to be more humid if the weather is misty or it is precipitating.  
+* The correlation between rental.count and wind.speed, -0.24, and rental.count and humidity, -0.1, are negative but are too low to indicate a linear relationship
+
+#### Correlation plots  
+
+The correlation plots are ordered to reflect the weather variables' degree of correlation. Temperature has the greatest linear correlation to rental count, then precipitation, wind speed and finally humidity. 
+
+```{r correlation summary, echo=FALSE, message = FALSE}
+# create plot showing correlation between rental.count and precipitation, temperature, humidity and wind.speed
+library(cowplot)
+library(gridExtra)
+library(ggpubr)
+
+### Fit Least Square Regression Line ####
+lsq_fit_temperature = lm(rental.count ~ temperature, data = bike.rental.key)
+lsq_fit_precipitation = lm(rental.count ~ precipitation, data = bike.rental.key)
+lsq_fit_wind.speed = lm(rental.count ~ wind.speed, data = bike.rental.key)
+lsq_fit_humidity = lm(rental.count ~ humidity, data = bike.rental.key)
+
+plotA = ggplot(bike.rental.key) +
+  geom_point(aes(x=temperature, y=rental.count), color = "#02075d", shape=4) +
+  geom_abline(intercept = coefficients(lsq_fit_temperature)[1], 
+              slope = coefficients(lsq_fit_temperature)[2], 
+              col="red", linetype = "dashed", size = 1) +
+  ggtitle(label = "Daily rental count by temperature") + 
+  labs(x="Temperature (°C)", y="Daily rental count") +
+  theme_classic() +
+  theme(plot.subtitle = element_text(color = "red", size = 8),
+        plot.title = element_text(size = 10),
+        axis.line = element_line(colour = "#a9a9a9"))
+               
+
+plotB = ggplot(bike.rental.key) +
+  geom_point(aes(x=precipitation, y=rental.count), color = "#02075d", shape=18) +
+  geom_abline(intercept = coefficients(lsq_fit_precipitation)[1], 
+              slope = coefficients(lsq_fit_precipitation)[2], 
+              col="red", linetype = "dashed", size = 1) +
+  ggtitle(label = "Daily rental count by precipitation") + 
+  labs(x="Precipitation category", y="Daily rental count") +
+  theme_classic() +
+  theme(plot.subtitle = element_text(color = "red", size = 8),
+        plot.title = element_text(size = 10),
+        axis.line = element_line(colour = "#a9a9a9"))               
+
+plotC = ggplot(bike.rental.key) +
+  geom_point(aes(x=wind.speed, y=rental.count), color = "#02075d", shape=4) +
+  geom_abline(intercept = coefficients(lsq_fit_wind.speed)[1], 
+              slope = coefficients(lsq_fit_wind.speed)[2], 
+              col="red", linetype = "dashed", size = 1) +
+  ggtitle(label = "Daily rental count by wind speed") + 
+  labs(x="Wind speed (mph)", y="Daily rental count") +
+  theme_classic() +
+  theme(plot.subtitle = element_text(color = "red", size = 8),
+        plot.title = element_text(size = 10),
+        axis.line = element_line(colour = "#a9a9a9"))   
+
+plotD = ggplot(bike.rental.key) +
+  geom_point(aes(x=humidity, y=rental.count), color = "#02075d", shape=4) +
+  geom_abline(intercept = coefficients(lsq_fit_humidity)[1], 
+              slope = coefficients(lsq_fit_humidity)[2], 
+              col="red", linetype = "dashed", size = 1) +
+  ggtitle(label = "Daily rental count by humidity") + 
+  labs(x="Realtive humidity (%)", y="Daily rental count") +
+  theme_classic() +
+  theme(plot.subtitle = element_text(color = "red", size = 8),
+        plot.title = element_text(size = 10),
+        axis.line = element_line(colour = "#a9a9a9"))   
+
+figure = plot_grid(plotA, plotB, plotC, plotD,
+          labels = c("A", "B", "C", "D"),
+          ncol = 2,
+          nrow = 2)
+
+annotate_figure(figure,
+                top = text_grob("Correlation plots of daily rental count against weather variables", 
+                                size = 11, hjust = 0.5, x =0.5),
+                                bottom = text_grob("Red dashed line = least square regression line", color = "red", size =10, hjust = 0, x =0),
+                )
+```
+#### Summary  
+
+The key finding from this analysis is that temperature has the most significant linear relationship with rental count. We will explore this relationship further in the next section.
+
+
+#### Temperature   
+
+The mean temperature across the two years is 15 degrees, however the histogram shows that the distribution of the temperature data is bimodal. The first peak is at 12 degrees and the other at around 31 degrees. 
+
+``` {r temperature, echo = FALSE}
+
+ggplot(data = bike.rental.data) +
+  geom_histogram(mapping = aes(x=temperature), binwidth = 3) +
+  scale_x_continuous(breaks = round(seq(min(bike.rental.data$temperature), max(bike.rental.data$temperature), by = 5),1)) +
+  theme_classic()+
+  ggtitle(label = "Temperature histogram")
+
+
+# The data is roughly bimodal. The first peak is at 12 degrees and the other at around 31 degrees
+
+summary(bike.rental.data$temperature)
+```
+
+Let's plot temperature and rental count across the year onto one plot (figure 1).
+
+``` {r rental count and temperature by day, echo=FALSE}
+# Plot temperature and rental count over time with a dual Y axis
+# value used to transform the data
+
+coeff = 100
+
+# Select colours
+temperatureColour = "#FFA500"
+rentalColour = "#02075d"
+
+# plot
+ggplot(bike.rental.data, aes(x=date)) +
+  
+  geom_point(aes(y=temperature), color = temperatureColour) +
+  geom_point(aes(y=rental.count/ coeff), color = rentalColour) +
+  
+  scale_y_continuous(
+    # Features of the first axis
+    name = "Temperature (°C)",
+    breaks = round(seq(min(bike.rental.data$temperature), max(bike.rental.data$temperature), by = 5),1),
+    #Add a second axis and specify its features
+    sec.axis = sec_axis(~.*coeff, name = "Number of rentals per day")
+  ) +
+  
+  theme_classic() +
+  theme(axis.title.y = element_text(color = temperatureColour, size=12, vjust = 1),
+        axis.title.y.right = element_text(color = rentalColour, size=12, vjust = 1),
+        axis.title.x = element_text(size=12),
+        plot.subtitle = element_text(face = "bold", size = 12),
+        plot.title = element_text(face = "bold", size = 12),
+        plot.caption = element_text(size = 12)) +
+  ggtitle(label = "Figure 1",
+          subtitle = "Rental count and temperature per day") +
+  labs(caption = "Data source: bike.rental.data") + 
+  xlab("Date")
+
+
+
+```
+
+The daily rental count follows the temperature pattern across the two years.
+
+``` {r average rentals by temperature, echo=FALSE, message = FALSE}
+rentalsBYtemp = bike.rental.data %>% 
+  group_by(temperature, year) %>%
+  summarise(totalrentals = sum(rental.count),
+            median.daily.rentals = median(rental.count),
+            mean.daily.rentals = mean(rental.count),
+            sd.daily.rentals = sd(rental.count),
+            percentage = round((totalrentals/3292679)*100)) # 3,292,679 = sum(bike.rental.data$rental.count))
+
+rentalsBYtemp$year = as.character(rentalsBYtemp$year)
+
+highlight_df <- rentalsBYtemp %>% 
   group_by(year) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
+  filter(mean.daily.rentals == max(mean.daily.rentals))
 
-bike.rental.data %>% 
-  group_by(just.month2) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
+ggplot(rentalsBYtemp) +
+  
+  geom_point(aes(x=temperature, y=median.daily.rentals, color = year)) +
+  geom_line(data = filter(rentalsBYtemp, year == 2012), aes(x=temperature, y=median.daily.rentals), color = "#02075d") +
+  geom_line(data = filter(rentalsBYtemp, year == 2011),  aes(x=temperature, y=median.daily.rentals), color = "#FFA500") +
+  geom_point(data=highlight_df, aes(x=temperature,y=median.daily.rentals), color='red') +
+  geom_text(data=highlight_df, aes(x=temperature,y=median.daily.rentals, label= as.character(temperature)),
+            hjust=1,vjust=0, nudge_x = 2, colour = "red", fontface = "bold") +
+  
+  theme_classic() +
+  theme(plot.subtitle = element_text(face = "bold", size = 12),
+        plot.title = element_text(face = "bold", size = 12)) +
+  
+  scale_x_continuous(breaks = round(seq(min(rentalsBYtemp$temperature), max(rentalsBYtemp$temperature), by = 5),1)) +
+  scale_colour_manual(values = c("2011" = "#FFA500", "2012" = "#02075d")) +
+  
+  ggtitle(label = "Figure 2",
+          subtitle = "Median number of rentals per day by temperature and year") +
+  labs(caption = "Data source: bike.rental.data") +
+  ylab("Median number of daily rentals") + xlab("Temperature (°C)")
 
-bike.rental.data %>% 
-  group_by(just.dayofweek2) %>%
-  summarise(total.rentals = sum(rental.count),
-            median.rentals = median(rental.count),
-            mean.rentals = mean(rental.count),
-            sd.rentals = sd(rental.count),
-            percentage = round((total.rentals/3292679)*100)
-  )
 
 ```
+
+Figure 2 shows that the average number of daily rentals increases with the tempertaure until around 24-26 degrees where it starts decreasing. 
+

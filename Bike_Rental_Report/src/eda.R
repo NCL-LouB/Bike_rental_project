@@ -210,107 +210,45 @@ ggplot(data = bike.rental.data %>%
 
 ################## Inspect the continuous variables ##################
 
-
-
-# Temperature
-table(bike.rental.data$temp)
+##### Temperature
+table(bike.rental.data$temperature)
 ggplot(data = bike.rental.data) +
-  geom_histogram(mapping = aes(x=temp))
-# There are two peaks the first around 8 degrees and the other 26 degrees
-summary(bike.rental.data$temp)
+  geom_histogram(mapping = aes(x=temperature), bins = 25)
+# The data is roughly bimodal. The first peak is at around 8 degrees and the other at around 26 degrees
+summary(bike.rental.data$temperature)
 # Minimum temp is -5 degrees 
 # Median temp is 15 degrees
 # Maximum temp is 32 degrees
 ggplot(data = bike.rental.data) +
-  geom_point(mapping = aes(x=date, y=temp))
+  geom_point(mapping = aes(x=date, y=temperature))
 # This plot clearly shows two temperature peaks in July 2011 and July 2012
 # It is coldest in December and January 
 
-# Temperature against Rentals 1
 
-# 1 Side by side
-# Create two plots
-p1 = ggplot(bike.rental.data, aes(x=date, y=temp)) +
-  geom_point()
+######## Plot the visual
+ggplot(data = rentalsBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=totalrentals)) +
+  geom_col(data = top.rental.daysBYtemp, aes(x=temperature, y=total.rentals.of.upper.quantile), fill = "blue")
+#blue shows the proporation of the total rentals that had days 
+#where the total rentals exceeded 5956, the upper 75% quantile
 
-p2 = ggplot(bike.rental.data, aes(x=date, y=rental_count)) +
-  geom_point()
-
-# Use patchwork to show them side by side
-p1 + p2
-
-# Temperature against Rentals 2
-# 2 dual Y axis with ggplot2
-
-# value used to transform the data
-coeff = 100
-# Colours
-temperatureColour = "#69b3a2"
-rentalColour = rgb(0.2, 0.6, 0.9, 1)
-
-ggplot(bike.rental.data, aes(x=date)) +
-  
-  geom_point(aes(y=temp), color = temperatureColour) +
-  geom_point(aes(y=rental_count/ coeff), color = rentalColour) +
-
-scale_y_continuous(
-  # Features of the first axis
-  name = "Temperature",
-  #Add a second axis and specify its features
-  sec.axis = sec_axis(~.*coeff, name = "Rentals")
-) +
-  theme_ipsum() +
-  
-  theme(
-    axis.title.y = element_text(color = temperatureColour, size=13),
-    axis.title.y.right = element_text(color = rentalColour, size=13)
-  ) +
-  ggtitle("Number of rentals per day and daily temperature")
-
-
-coeff = 100
-# Colours
-temperatureColour = "#69b3a2"
-rentalColour = rgb(0.2, 0.6, 0.9, 1)
-
-ggplot(bike.rental.data, aes(x=date)) +
-  
-  geom_line(aes(y=temp), color = temperatureColour) +
-  geom_line(aes(y=rental_count/ coeff), color = rentalColour) +
-  
-  scale_y_continuous(
-    # Features of the first axis
-    name = "Temperature",
-    #Add a second axis and specify its features
-    sec.axis = sec_axis(~.*coeff, name = "Rentals")
-  ) +
-  theme_ipsum() +
-  
-  theme(
-    axis.title.y = element_text(color = temperatureColour, size=13),
-    axis.title.y.right = element_text(color = rentalColour, size=13)
-  ) +
-  ggtitle("Number of rentals per day and daily temperature")
-
-# Count the number of rentals on all days that have the same temperature
-# Calculate the median number of rentals when the temp is a given temperature
-rentalsBYtemp = bike.rental.data %>% 
-  group_by(temp) %>%
-  summarise(totalrentals = sum(rental_count),
-            medianrentals = median(rental_count))
+######## Plot the visual
+ggplot(data = rentalsBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=mean.daily.rentals))
+ggplot(data = rentalsBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=mean.daily.rentals)) +
+  geom_line(aes(y=median.daily.rentals), color = "red")
 
 # Plot the visual
-ggplot(data = rentalsBYtemp, aes(x=temp)) +
-  geom_line(aes(y=totalrentals)) +
-  geom_point(aes(y=totalrentals))
-# Plot the visual
-ggplot(data = rentalsBYtemp, aes(x=temp)) +
+ggplot(data = rentalsBYtemp, aes(x=temperature)) +
   geom_line(aes(y=medianrentals)) +
   geom_line(aes(y=medianrentals))
 
 
-ggplot(data = bike.rental.data, aes(x=temp, y=rental_count, color = weathersit)) +
-  geom_point(shape = 20, position = "jitter")
+ggplot(data = bike.rental.data, aes(x=temperature, y=rental.count)) +
+  geom_point(shape = 20, position = "jitter") + 
+  geom_smooth()
+
   
 
 
@@ -355,30 +293,30 @@ ggplot(bike.rental.data, aes(x=date)) +
 
 # Count the number of rentals on all days that have the same temperature
 # Calculate the median number of rentals when the temp is a given temperature
-rentalsBYhum = bike.rental.data %>% 
-  group_by(hum) %>%
-  summarise(totalrentals = sum(rental_count),
-            medianrentals = median(rental_count))
+rentalsBYhumidity = bike.rental.data %>% 
+  group_by(humidity) %>%
+  summarise(totalrentals = sum(rental.count),
+            medianrentals = median(rental.count))
 
 # Plot the visual
-ggplot(data = rentalsBYhum, aes(x=hum)) +
+ggplot(data = rentalsBYhumidity, aes(x=humidity)) +
   geom_col(aes(y=totalrentals)) 
 
 # Plot the visual
-ggplot(data = rentalsBYhum, aes(x=hum)) +
+ggplot(data = rentalsBYhumidity, aes(x=humidity)) +
   geom_col(aes(y=medianrentals)) 
 
 # Wind Speed
-table(bike.rental.data$windspeed)
+table(bike.rental.data$wind.speed)
 ggplot(data = bike.rental.data) +
-  geom_histogram(mapping = aes(x=windspeed))
+  geom_histogram(mapping = aes(x=wind.speed))
 # This peaks at around 11
 summary(bike.rental.data$windspeed)
 # Min wind speed is 1.5
 # Median wind speed is 12.125
 # Max wind speed is 34
 ggplot(data = bike.rental.data) +
-  geom_point(mapping = aes(x=date, y=windspeed))
+  geom_point(mapping = aes(x=date, y=wind.speed))
 # There doesnt appear to be a distinct seasonal pattern to wind speed levels
 
 coeff = 100
@@ -388,8 +326,8 @@ renatalColour = rgb(0.2, 0.6, 0.9, 1)
 
 ggplot(bike.rental.data, aes(x=date)) +
   
-  geom_line(aes(y=windspeed), color = windspeedColour) +
-  geom_line(aes(y=rental_count/ coeff), color = rentalColour) +
+  geom_line(aes(y=wind.speed), color = windspeedColour) +
+  geom_line(aes(y=rental.count/ coeff), color = rentalColour) +
   
   scale_y_continuous(
     # Features of the first axis
@@ -405,15 +343,19 @@ ggplot(bike.rental.data, aes(x=date)) +
   ) +
   ggtitle("Number of rentals per day and wind speed")
 
+# Wind speed against rental count
+ggplot(bike.rental.data) +
+  geom_point(aes(x=wind.speed, y=rental.count))
+
 # Count the number of rentals on all days that have the same temperature
 # Calculate the median number of rentals when the temp is a given temperature
 rentalsBYwindspeed = bike.rental.data %>% 
-  group_by(windspeed) %>%
-  summarise(totalrentals = sum(rental_count),
-            medianrentals = median(rental_count))
+  group_by(wind.speed) %>%
+  summarise(totalrentals = sum(rental.count),
+            medianrentals = median(rental.count))
 
 # Plot the visual
-ggplot(data = rentalsBYwindspeed, aes(x=windspeed)) +
+ggplot(data = rentalsBYwindspeed, aes(x=wind.speed)) +
   geom_col(aes(y=totalrentals)) 
 
 # Plot the visual
@@ -423,12 +365,46 @@ ggplot(data = rentalsBYwindspeed, aes(x=windspeed)) +
 
 # Bike rental count per day
 ggplot(data = bike.rental.data) +
-  geom_histogram(mapping = aes(x=rental_count))
+  geom_histogram(mapping = aes(x=rental.count))
 summary(bike.rental.data$rental_count)
 # Min rental count is 22
 # Median rental count is 4548
 # Max rental count is 8714
+quantile(bike.rental.data$rental.count) 
+# 0%  25%  50%  75% 100% 
+# 22 3152 4548 5956 8714
 ggplot(data = bike.rental.data) +
-  geom_point(mapping = aes(x=date, y=rental_count))
+  geom_point(mapping = aes(x=date, y=rental.count))
 # There does appear to be a seasonal pattern to bike rental counts
+
+# Upper 75% quantile is 5956 so let's filter by this and see if there are 
+# any similar variables
+top.rental.days = bike.rental.data %>%
+  filter(rental.count >= 5956)
+
+# Count the number of rentals on all days that have the same temperature
+# Calculate the median number of rentals when the temp is a given temperature
+top.rental.daysBYtemp = top.rental.days %>% 
+  group_by(temperature) %>%
+  summarise(total.rentals.of.upper.quantile = sum(rental.count),
+            median.daily.rentals = median(rental.count),
+            mean.daily.rentals = mean(rental.count),
+            sd.daily.rentals = sd(rental.count),
+            percentage = round((total.rentals.of.upper.quantile/1288768)*100), # 1288768 = sum(top.rental.days$rental.count)
+            mean.humidity = mean(humidity),
+            sd.humidity = sd(humidity),
+            mean.wind.speed = mean(wind.speed),
+            sd.wind.speed = sd(wind.speed)) 
+
+
+
+######## Plot the visual
+ggplot(data = top.rental.daysBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=total.rentals.of.upper.quantile))
+######## Plot the visual
+ggplot(data = top.rental.daysBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=mean.daily.rentals))
+ggplot(data = top.rental.daysBYtemp, aes(x=temperature)) +
+  geom_col(aes(y=mean.daily.rentals)) +
+  geom_line(aes(y=median.daily.rentals), color = "red")
 

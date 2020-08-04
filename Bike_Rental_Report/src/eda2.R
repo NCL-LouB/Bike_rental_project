@@ -34,4 +34,25 @@ rentalsBYseason = bike.rental.data %>%
 
 # Median and mean are very similar so go with the mean
 
+##### Temperature against Rentals 1
+# 1 Side by side
+# Create two plots
+p1 = ggplot(bike.rental.data, aes(x=date, y=temperature)) +
+  geom_point()
 
+p2 = ggplot(bike.rental.data, aes(x=date, y=rental.count)) +
+  geom_point()
+
+# Use patchwork to show them side by side
+p1 + p2
+
+tempertaure.obs = data.frame(table(bike.rental.data$temperature))
+colnames(tempertaure.obs) = c("temperature", "count")
+tempertaure.obs$temperature = as.numeric(tempertaure.obs$temperature)
+head(arrange(tempertaure.obs, desc(count)), 5)
+
+
+ggplot(data = tempertaure.obs) +
+  geom_col(mapping = aes(x=temperature, y = count)) +
+  scale_x_continuous(breaks = round(seq(min(bike.rental.data$temperature), max(bike.rental.data$temperature), by = 5),1)) +
+  theme_classic()

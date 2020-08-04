@@ -1,5 +1,6 @@
 # Example preprocessing script.
 
+bike.rental.data = read_csv("~/Bike_rental_project/Bike_Rental_Report/data/bike rental data.csv")
 # Duplicate the dataframe
 rental.data = bike.rental.data
 # Create date column
@@ -44,47 +45,25 @@ bike.rental.data = bike.rental.data %>%
 bike.rental.data = bike.rental.data %>% 
   rename(days.since.2011 = days_since_2011)
 
-# Reorder columns 
-bike.rental.data = select(bike.rental.data, rental.count, season, weather.category, 
-                          temperature, humidity, wind.speed, holiday, working.day,
-                          days.since.2011, date, just.day, just.dayofweek,
-                          just.dayofweek2, just.month, just.month2, year)
-
-
 # round the temp, wind speed and humidity  columns to remove decimal place
-bike.rental.data[,4] = round(bike.rental.data[,4])
 bike.rental.data[,5] = round(bike.rental.data[,5])
 bike.rental.data[,6] = round(bike.rental.data[,6])
-
-
-############## Create duplicate data frame for multiple linear regression analysis ##############
-bike.rental.data.reg = bike.rental.data
-# Check the levels for season
-levels(bike.rental.data.reg$season)
-# 1       2        3        4
-#"FALL"   "SPRING" "SUMMER" "WINTER"
-# change to numbers
-bike.rental.data.reg$season = as.numeric(bike.rental.data.reg$season)
+bike.rental.data[,7] = round(bike.rental.data[,7])
 
 
 # Check the levels for weather.category
-levels(bike.rental.data.reg$weather.category)
+levels(bike.rental.data$weather.category)
 # 1       2        3        
 # "GOOD"  "MISTY" "RAIN/SNOW/STORM"
-# change to numbers
-bike.rental.data.reg$weather.category = as.numeric(bike.rental.data.reg$weather.category)
 
-# Check the levels for holiday
-levels(bike.rental.data.reg$holiday)
-# 1              2               
-# "HOLIDAY"    "NO HOLIDAY"
-# change to numbers
-bike.rental.data.reg$holiday = as.numeric(bike.rental.data.reg$holiday)
+# Create new column with precipitation categories 
+bike.rental.data$precipitation = bike.rental.data$weather.category
+# Change characters to numbers to reflect the levels 
+bike.rental.data$precipitation = as.numeric(bike.rental.data$precipitation)
 
-# Check the levels for working.day
-levels(bike.rental.data.reg$working.day)
-# 1                 2               
-# "NO WORKING DAY" "WORKING DAY" 
-# change to numbers
-bike.rental.data.reg$working.day = as.numeric(bike.rental.data.reg$working.day)
+# Reorder columns 
+bike.rental.data = select(bike.rental.data, rental.count, precipitation, 
+                          temperature, humidity, wind.speed, weather.category, season, holiday, working.day,
+                          days.since.2011, date, just.day, just.dayofweek,
+                          just.dayofweek2, just.month, just.month2, year)
 

@@ -62,6 +62,8 @@ summary(lsq_fit)
 #  workingday     40.44      50.82   0.796 0.426455  
 
 
+
+
 # split into training and test. split into odds and evens
 #bikerental_train = bike.rental.data.reg[1:365,]
 #bikerental_test = bike.rental.data.reg[365:731,]
