@@ -1,0 +1,158 @@
+---
+title: "Multiple Linear Regression"
+author: "Louise Braithwaite"
+date: "03/08/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir=normalizePath('~/Bike_rental_project/Bike_Rental_Report'))
+```
+
+
+``` {r loading, include=FALSE}
+library(ProjectTemplate)
+load.project()
+```
+
+
+## Exploratory Data Analysis
+### Pairs Plot
+
+```{r pairs plot, echo=FALSE}
+# Prodcuce a scatterplot matrix of predictor and explanatory variables
+pairs(bike.rental.data.reg)
+
+```
+There appears to be a moderately strong and positive linear correlation between rental.count and temperature; as temperature increases so does rental.count.
+There appears to be some indication of a negative linear correlation between rental.count and humidity; as humidity increases rental.count decreases.
+There appears to be some indication of a negative linear correlation between rental.count and wind speed; as wind speed increases rental.count decreases.
+weather.category is a categorical variable with three levels:
+
+1. "GOOD"
+2. "MISTY"
+3. "RAIN/SNOW/STORM"
+
+```{r weather.category, echo=FALSE}
+# Review the weather.category data
+table(bike.rental.data.reg$weather.category)
+```
+
+Here the base level is that the weather is good, which makes sense as across the data set the weather has been categorised as "GOOD" 63% of the time. 34% of the time the weather is categorised as "MISTY" and 3% of the time the weather is categorised as "RAIN/SNOW/STORM".
+
+The pairs plot indicates that the weather.category is an indicator of precipiation, as the "MISTY" and "RAIN/SNOW/STORM" categories have higher recording of humidity. *It appears safe to assume that good indicates no rain.* 
+
+
+### Sample Means and Covariance Matrix
+
+```{r sample means and covariance matrix, echo=FALSE}
+# calculate the variable means
+colMeans(bike.rental.data.reg)
+# calculate the covariance matrix
+var(bike.rental.data.reg)
+```
+
+
+### Correlation Matrix
+Use the correlation matrix to quantify the strength of a linear relationship between pairs of variables. 
+
+```{r correlation matrix, echo=FALSE}
+# calculate the correlation matrix
+cor(bike.rental.data.reg)
+```
+
+The correlation matrix confirms our previous observations:
+
+* The correlation between rental.count and temperature, 0.63, indicates a moderately strong positive linear relationship
+* The correlation indicators between rental.count and weather.catergory. -0.3 suggests there is some indication of a negative linear relationship between the two variables, which supports the assumption that as the weather goes from no rain ("GOOD"), to "MISTY", to "RAIN/SNOW/STORM" the rental.count will decrease
+* The correlation between weather.category and humidity, 0.59, indicates a moderately strong positive linear relationship
+* The correlation indicators between rental.count and humidity, -0.1, and rental.count and wind.speed, -0.24, are negative but are too low to indicate a linear relationship
+
+### Multiple Linear Regression
+
+```{r MLR1, echo=FALSE}
+# We can see that the response variable (rental.count) is stored in column 1 and 
+# the explanatory variables appear in columns 2-5. The explanatory variables are 
+# in their raw form and so we will need to be transformed. 
+
+# Extract response variable
+y = bike.rental.data.reg[,1]
+
+# Extract explanatory variables
+X_raw = bike.rental.data.reg[,2:5]
+# Convert to matrix
+X_raw = as.matrix(X_raw)
+# Scale the explanatory variables
+X = scale(X_raw)
+
+# Create single data frame containing response and explanatory variables:
+bike.rental.data.reg.scaled = data.frame(y, X)
+
+# Fit linear model using least squares
+lsq_fit = lm(rental.count ~ ., data = bike.rental.data.reg.scaled)
+# Summarise fitted model
+(lsq_summary = summary(lsq_fit))
+
+attr(X, "scaled:scale")
+```
+The least squares estimates of the regression coefficients are
+β0 = 4504.35, β1 = -262.88, β2 = 1165.37, β3 = -269.55, β4 = -326.11
+
+β2 = 1165.37 indicates that if we increase the temperature by 8.6 degrees celsius we expect rental.count to increase by 1165 rentals on average, if all the other variables stay constant.
+R^2 value is 0.4721. We interpret this to mean that 47.21% of the variation in rental.count can be explained by regression on the four standardised predictors. This leaves a large proportion of the variation unexplained. 
+
+```{r MLR1, echo=FALSE}
+# We can see that the response variable (rental.count) is stored in column 1 and 
+# the explanatory variables appear in columns 2-5. The explanatory variables are 
+# in their raw form and so we will need to be transformed. 
+
+# Extract response variable
+bike.rental.data.temp = bike.rental.data.reg[,c(1,3)]
+
+# Fit linear model using least squares
+lsq_fit_temp = lm(rental.count ~ ., data = bike.rental.data.temp)
+# Summarise fitted model
+(lsq_summary = summary(lsq_fit_temp))
+
+```
+``` {r}
+library(leaps)
+p=4
+
+# apply the best subset selection algorithm
+bss_fit = regsubsets(rental.count ~ ., data = bike.rental.data.reg.scaled, method = "exhaustive", nvmax = p)
+# summarise the results
+(bss_summary = summary(bss_fit))
+str(bss_summary)
+
+# To compare the fits of the models we can use adjusted-R^2, Mallow's C statistic or the BIC:
+# adjusted-R^2
+bss_summary$adjr2
+# Mallow's C statistic
+bss_summary$cp
+# BIC
+bss_summary$bic
+
+# The best models according to each criteria are therefore:
+# adjusted-R^2 = model 10
+(best_adjr2 = which.max(bss_summary$adjr2))
+# Mallow's C statistic = model 1
+(best_cp = which.min(bss_summary$cp))
+# BIC = model 1
+(best_bic = which.min(bss_summary$bic))
+
+coef(bss_fit, 4)
+# As both the adjusted-R^2 and Mallow's C statistic show that the optimal point is 1 we will 
+# select model 1. The associated regression coefficients are:
+```
+
+Best subset selection shows:
+
+* The best model with one explanatory variable uses temperature
+* The best model with two explanatory variable uses temperature and weather.category
+* The best model with three explanatory variable uses temperature, weather.category and wind.speed
+* But the best module used four all explanatory variables temperature, weather.category, wind.speed and humidity. Unfortunately only 47.21% of the variation in rental.count can be explained by regression on the four standardised predictors in the regression model. This leaves a large proportion of the variation unexplained. 
+
+Proposed next steps: 
+Include other variables. 

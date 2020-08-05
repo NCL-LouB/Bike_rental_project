@@ -48,16 +48,28 @@ The following data assumptions were made.
 
 1. Initial exploratory data analysis (EDA) of all variables to identify key variables ([see github repository](https://github.com/NCL-LouB/Bike_rental_project))
 2. A pairs plot and correlation matrix were generated for the key variables. This included a predictor variable, ‘rental.count’, and four explanatory variables: ‘temperature’, ‘humidity’, ‘wind.speed’ and ‘precipitation’
-3. Further EDA was undertaken on the variable that had the strongest linear correlation with number of daily rentals, temperature
+3. A least squares linear regression model was fitted to the key variables but only 47.21% of the variation in rental.count could be explained by regression on the four standardised predictors. This leaves a large proportion of the variation unexplained and so the model was rejected.
+4. Further EDA was undertaken on the variable that had the strongest linear correlation with number of daily rentals, temperature
 
 ## 3. Data analysis 
 
 ### 3.1 Correlation coefficients
-A correlation coefficient measures the strength and direction of the linear relationship between two variables.
-A value of exactly 1.0 means there is a perfect positive relationship between the two variables. For a positive increase in one variable, there is also a positive increase in the second variable. A value of -1.0 means there is a perfect negative relationship between the two variables.
+A correlation coefficient measures the strength (0-1) and direction (+ or -) of the linear relationship between two variables.
+A value of exactly 1.0 means there is a perfect positive relationship between the two variables, so a positive increase in one variable relates to a positive increase in the second variable. 
+.  
+.  
+.   
+.  
+.  
+.  
 
 
 
+
+
+
+
+**Table 1: Summary of correlation coefficients**
 ``` {r correlation coefficients, message = FALSE, warning = FALSE, echo = FALSE}
 library(knitr)
 library(kableExtra)
@@ -74,30 +86,48 @@ coefficient = round(cor(bike.rental.key)[c(3,2,5,4)], 2)
 # Create data frame
 cc = tibble(variable.1, variable.2, coefficient)
  
-kable(cc) %>%
+kable(cc, "latex") %>%
   kable_styling(bootstrap_options = "striped", full_width = FALSE, position = "left") %>%
   row_spec(0, bold = T) %>%
   row_spec(1,background = "#c2e7c2") %>%
   row_spec(2,background = "#f2eec7")
 
 ```
-### Table 1: Summary of correlation coefficients
+   
+   
+.    
 
 
 The correlation coefficients in table 1 show:
 
-* The correlation between rental.count and temperature, 0.63, indicates a moderately strong positive linear relationship
-* The correlation between rental.count and weather.catergory, -0.3, suggests there is some indication of a negative linear relationship between the two variables. This supports the assumption that as the weather goes from no rain ("GOOD"), to "MISTY", to "RAIN/SNOW/STORM" the rental.count will decrease. 
-* The correlation between rental.count and wind.speed, -0.24, and rental.count and humidity, -0.1, are negative but are too low to indicate a linear relationship.
+* The correlation between rental.count and temperature is 0.63, which indicates a moderately strong positive linear relationship
+* The correlation between rental.count and weather.catergory is -0.3, which suggests there is some indication of a negative linear relationship between the two variables. This supports the assumption that as the weather goes from no rain ("GOOD"), to "MISTY", to "RAIN/SNOW/STORM" rental.count will decrease
+* The correlation between rental.count and wind.speed is -0.24 and rental.count and humidity id -0.1. Both are negative but the coefficients are too low to indicate a linear relationship  
 
-**Key finding: temperature has the most significant linear relationship with rental count. Figures 1 and 2 explore this relationship in more detail.**  
+***
 
-.  
+**Key finding: temperature has the most significant linear relationship with rental count.**  
+The relationship between temperature and rental count is explored in more detail in figures 1 and 2.
+
+***  
 
 
 ### 3.2 Daily temperature and rental count trend over two years
 
-Figure one plots the daily temperature and daily rental count across the two year period. The plot shows that the annual trend of daily rentals follows the annual temperature trend.
+Figure 1 plots the daily temperature and daily rental count across the two year period. The plot shows that the annual trend of daily rentals follows the annual temperature trend. Temperatures and number of daily rentals peak in the summer and early fall months and are at their lowest in January and February. 
+
+.  
+
+### 3.3 Median rental count by temperature  
+
+Figure 2 shows that the median number of daily rentals increases with the temperature up to the mid-20s. After this point the median daily rentals starts to decrease. 
+
+This figure provides an indication of what the bike rental company could expect their rental numbers to be on a average day given a certain temperature. 
+
+.  
+
+## 4. Future work  
+The analysis may be improved by identifying a continuous measure of daily rainfall, in addition to the categorical value used to identify, no rain, mist, rain, snow and storm. To build upon this initial exploratory data analysis work, further statistical modeling could be conducted to identify a model which incorporates all four key weather indicators.
 
 
 ``` {r Figure 1, echo = FALSE, message = FALSE}
@@ -127,20 +157,60 @@ ggplot(bike.rental.data, aes(x=date)) +
   theme_classic() +
   theme(axis.title.y = element_text(color = temperatureColour, size=12, vjust = 1),
         axis.title.y.right = element_text(color = rentalColour, size=12, vjust = 1),
-        axis.title.x = element_text(size=12),
         plot.subtitle = element_text(face = "bold", size = 12),
-        plot.title = element_text(face = "bold", size = 12),
-        plot.caption = element_text(size = 12)) +
-  ggtitle(label = "Figure 1",
-          subtitle = "Rental count and temperature per day") +
+        plot.title = element_text(face = "bold", size = 12)) +
+  ggtitle(label = "Figure 1: Daily rental count and temperature over 2 years") +
   labs(caption = "Data source: bike.rental.data") + 
   xlab("Date")
 
 ```
 
+``` {r temperature data, include = FALSE, message = FALSE}
+# Month summary table
+bike.rental.data %>% 
+  group_by(just.month2) %>%
+  summarise(total.rentals = sum(rental.count),
+            median.rentals = median(rental.count),
+            mean.rentals = mean(rental.count),
+            sd.rentals = sd(rental.count),
+            percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+)
 
+# Plot showing the median rentals by month
+ggplot(data = bike.rental.data %>% 
+         group_by(just.month2) %>%
+         summarise(total.rentals = sum(rental.count),
+                   median.rentals = median(rental.count),
+                   mean.rentals = mean(rental.count),
+                   sd.rentals = sd(rental.count),
+                   percentage = round((total.rentals/3292679)*100) # 3,292,679 = sum(bike.rental.data$rental.count)
+         )
+         ) +
+  geom_col(aes(x=just.month2, y=median.rentals))
 
+# The median rental number is significantly lower in Janaury and February than the other months
+# Let's see if the lower rental rate in these months could be attributed to a lower 
+# median temperature in these months
 
+# Plot showing the median temperature by season
+ggplot(data = bike.rental.data %>% 
+         group_by(just.month2) %>%
+         summarise(total.temperature = sum(temperature),
+                   median.temperature = median(temperature),
+                   mean.temperature = mean(temperature),
+                   sd.temperature = sd(temperature)) # 11171 = sum(bike.rental.data$temperature)
+         ) + 
+  geom_col(aes(x=just.month2, y = median.temperature))
+
+bike.rental.data %>% 
+  group_by(just.month2) %>%
+  summarise(total.temperature = sum(temperature),
+            median.temperature = median(temperature),
+            mean.temperature = mean(temperature),
+            sd.temperature = sd(temperature))
+
+# Yes the lower median number of rentals in January (1939 per day) and February  (2402 per day) reflects the low median temperature in January (2 degrees) and February (5 degrees)
+```
 
 ``` {r Figure 2, echo = FALSE, message = FALSE}
 # FIGURE 2 - plot median daily rentals by temperature - seperate 2011 and 2012
@@ -189,12 +259,6 @@ ggplot(rentalsBYtemp) +
 
 ```
 
-### 3.3 Median rental count by temperature  
-
-Figure 2 shows that the median number of daily rentals increases with the temperature up to the mid-20s, when the median daily rentals starts to decrease. 
 
 
-## 4. Future work  
-To build upon this work
 
-* Use data to build a model to predict rental 
